@@ -1,0 +1,49 @@
+services:
+    app:
+        build: 
+          context: .
+          dockerfile: ./Dockerfile
+        container_name: app
+        platform: linux/amd64
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+          - "./src:/var/www/laravel/"
+        depends_on:
+          - db
+        #command: /bin/bash -c "cd /var/www/laravel && composer create-project laravel/laravel app && ln -s /var/www/laravel/app/public /var/www/html"
+
+
+    db:
+        image: mysql:latest
+        container_name: mysql
+        platform: linux/amd64
+        ports:
+          - 3306:3306
+        restart: always
+        volumes:
+          - db-store:/var/lib/mysql
+        hostname: db
+        user: mysql:mysql
+        environment:
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: app
+            MYSQL_USER: mysql
+            MYSQL_PASSWORD: root
+            MYSQL_ROOT_PASSWORD: testtest
+
+    phpmyadmin:
+      image: phpmyadmin
+      depends_on:
+        - db
+      environment:
+        - PMA_ARBITRARY=1
+        - PMA_HOSTS=db
+        - PMA_USER=root
+        - PMA_PASSWORD=testtest
+      ports:
+        - "3001:80"
+
+volumes:
+  db-store:
